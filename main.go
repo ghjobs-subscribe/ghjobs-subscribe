@@ -19,6 +19,7 @@ func main() {
 
 func (i *impl) subscribeHandler(c *gin.Context) {
 	email := c.PostForm("email")
+	c.Header("Access-Control-Allow-Origin", "*")
 	if len(email) == 0 {
 		c.JSON(200, gin.H{
 			"success": false,
