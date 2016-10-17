@@ -1,7 +1,7 @@
 package main
 
 import (
-	"regexp"
+	"net/mail"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,12 +20,7 @@ func main() {
 func (i *impl) subscribeHandler(c *gin.Context) {
 	email := c.PostForm("email")
 	c.Header("Access-Control-Allow-Origin", "*")
-	if len(email) == 0 {
-		c.JSON(200, gin.H{
-			"success": false,
-			"message": "Looks like you forgot to enter your email.",
-		})
-	} else if m, _ := regexp.MatchString(`^([\w\.\_]{2,10})@(\w{1,}).([a-z]{2,4})$`, email); !m {
+	if _, err := mail.ParseAddress(email); len(email) == 0 || len(email) > 254 || err != nil {
 		c.JSON(200, gin.H{
 			"success": false,
 			"message": "That email doesn't seem like a valid one.",
@@ -42,12 +37,12 @@ func (i *impl) subscribeHandler(c *gin.Context) {
 			if !ok {
 				c.JSON(200, gin.H{
 					"success": false,
-					"message": "An error internal error occured. Please try again later.",
+					"message": "An internal error occured. Please try again later.",
 				})
 			} else {
 				c.JSON(200, gin.H{
 					"success": true,
-					"message": "Happy to have you! Check your email for subscription confirmation.",
+					"message": "All set! Check your email for subscription confirmation.",
 				})
 			}
 		}
@@ -56,29 +51,18 @@ func (i *impl) subscribeHandler(c *gin.Context) {
 
 func (i *impl) unsubscribeHandler(c *gin.Context) {
 	email := c.PostForm("email")
-	if len(email) == 0 {
+	c.Header("Access-Control-Allow-Origin", "*")
+	ok := i.checkBucketExists(email)
+	if !ok {
 		c.JSON(200, gin.H{
-			"success": false,
-			"message": "Looks like you forgot to enter your email.",
+			"success": true,
+			"message": "Sad that you are leaving. Check your email for unsubscription confirmation.",
 		})
-	} else if m, _ := regexp.MatchString(`^([\w\.\_]{2,10})@(\w{1,}).([a-z]{2,4})$`, email); !m {
-		c.JSON(200, gin.H{
-			"success": false,
-			"message": "That email doesn't seem like a valid one.",
-		})
-	} else {
-		ok := i.checkBucketExists(email)
-		if !ok {
-			c.JSON(200, gin.H{
-				"success": true,
-				"message": "Sad that you are leaving. Check your email for unsubscription confirmation.",
-			})
 
-		} else {
-			c.JSON(200, gin.H{
-				"success": false,
-				"message": "A subscription with this email does not exist.",
-			})
-		}
+	} else {
+		c.JSON(200, gin.H{
+			"success": false,
+			"message": "A subscription with this email does not exist.",
+		})
 	}
 }
