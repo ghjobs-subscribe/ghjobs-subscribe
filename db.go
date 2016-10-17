@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"path"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/boltdb/bolt"
@@ -12,8 +14,10 @@ type impl struct {
 }
 
 func (i *impl) initDB() {
+	gopath := os.Getenv("GOPATH")
+	ghjsDBPath := path.Join(gopath, "src", "github.com", "ghjobs-subscribe", "ghjobs-subscribe", "subs.db")
 	var err error
-	i.DB, err = bolt.Open("subs.db", 0600, nil)
+	i.DB, err = bolt.Open(ghjsDBPath, 0600, nil)
 	if err != nil {
 		logrus.Fatal(err)
 	}
