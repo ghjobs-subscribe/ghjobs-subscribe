@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path"
 	"time"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/boltdb/bolt"
 )
 
@@ -20,7 +20,7 @@ func (i *impl) initDB() {
 	var err error
 	i.DB, err = bolt.Open(ghjsDBPath, 0600, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
-		logrus.Fatal(err)
+		log.Fatal(err)
 	}
 }
 
