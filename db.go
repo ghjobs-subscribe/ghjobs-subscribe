@@ -25,45 +25,46 @@ func (i *impl) initDB() {
 }
 
 // frequence: weekly (1), fortnightly (2), monthly (3)
+// TODO: parse date from time.Now().String()
 func (i *impl) createUserBucket(email string) bool {
 	err := i.DB.Update(func(tx *bolt.Tx) error {
 		b, err := tx.CreateBucket([]byte(email))
 		if err != nil {
 			return fmt.Errorf("create bucket: %v", err)
 		}
-		err = b.Put([]byte("email"), []byte(email))
+		err = b.Put([]byte("userEmail"), []byte(email))
 		if err != nil {
 			return err
 		}
-		err = b.Put([]byte("firstname"), []byte(""))
+		err = b.Put([]byte("userFirstName"), []byte(""))
 		if err != nil {
 			return err
 		}
-		err = b.Put([]byte("lastname"), []byte(""))
+		err = b.Put([]byte("userLastName"), []byte(""))
 		if err != nil {
 			return err
 		}
-		err = b.Put([]byte("ghjobstag"), []byte(""))
+		err = b.Put([]byte("subTag"), []byte(""))
 		if err != nil {
 			return err
 		}
-		err = b.Put([]byte("ghjobslocation"), []byte(""))
+		err = b.Put([]byte("subLocation"), []byte(""))
 		if err != nil {
 			return err
 		}
-		err = b.Put([]byte("frequence"), []byte("1"))
+		err = b.Put([]byte("subFrequence"), []byte(""))
 		if err != nil {
 			return err
 		}
-		err = b.Put([]byte("lastsent"), []byte(""))
+		err = b.Put([]byte("emailLastSent"), []byte(""))
 		if err != nil {
 			return err
 		}
-		err = b.Put([]byte("nextsend"), []byte(""))
+		err = b.Put([]byte("emailNextSend"), []byte(""))
 		if err != nil {
 			return err
 		}
-		err = b.Put([]byte("createdon"), []byte(time.Now().String()))
+		err = b.Put([]byte("userCreatedOn"), []byte(time.Now().Local().String()))
 		if err != nil {
 			return err
 		}
