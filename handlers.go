@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/mail"
 
 	"github.com/gin-gonic/gin"
@@ -8,24 +9,35 @@ import (
 
 func subscribeHandler(c *gin.Context) {
 	i := impl{}
-	i.initDB()
+	err := i.initDB()
+	if err != nil {
+		log.Panicf("error initializing DB: %v\n", err)
+	}
 	defer i.DB.Close()
+
 	email := c.PostForm("email")
 	c.Header("Access-Control-Allow-Origin", "*")
+
 	if _, err := mail.ParseAddress(email); len(email) == 0 || len(email) > 254 || err != nil {
 		c.JSON(200, gin.H{
 			"success": false,
 			"message": "That email doesn't seem like a valid one.",
 		})
 	} else {
-		ok := i.checkBucketExists(email)
+		ok, err := i.checkBucketExists(email)
+		if err != nil {
+			log.Panicf("error viewing bucket: %v\n", err)
+		}
 		if !ok {
 			c.JSON(200, gin.H{
 				"success": false,
 				"message": "A subscription with this email already exists.",
 			})
 		} else {
-			ok := i.createUserBucket(email)
+			ok, err := i.createUserBucket(email)
+			if err != nil {
+				log.Panicf("error updating bucket: %v\n", err)
+			}
 			if !ok {
 				c.JSON(200, gin.H{
 					"success": false,
@@ -43,11 +55,19 @@ func subscribeHandler(c *gin.Context) {
 
 func unsubscribeHandler(c *gin.Context) {
 	i := impl{}
-	i.initDB()
+	err := i.initDB()
+	if err != nil {
+		log.Panicf("error initializing DB: %v\n", err)
+	}
 	defer i.DB.Close()
+
 	email := c.PostForm("email")
 	c.Header("Access-Control-Allow-Origin", "*")
-	ok := i.checkBucketExists(email)
+
+	ok, err := i.checkBucketExists(email)
+	if err != nil {
+		log.Panicf("error viewing bucket: %v\n", err)
+	}
 	if !ok {
 		c.JSON(200, gin.H{
 			"success": true,
