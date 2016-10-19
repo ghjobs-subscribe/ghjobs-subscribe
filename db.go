@@ -68,7 +68,7 @@ func (i *impl) createUserBucket(email string) error {
 		if err != nil {
 			return err
 		}
-		err = b.Put([]byte("userCreatedOn"), []byte(time.Now().Format("2006-01-02 15:04:05 -0700")))
+		err = b.Put([]byte("userCreatedOn"), []byte(time.Now().Format("2006-01-02 15:04:05")))
 		if err != nil {
 			return err
 		}
