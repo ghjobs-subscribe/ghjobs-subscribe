@@ -14,8 +14,8 @@ type impl struct {
 }
 
 func (i *impl) initDB() error {
-	gopath := os.Getenv("GOPATH")
-	ghjsDBPath := path.Join(gopath, "src", "github.com", "ghjobs-subscribe", "ghjobs-subscribe", "subs.db")
+	home := os.Getenv("HOME")
+	ghjsDBPath := path.Join(home, "ghjs-data", "subs.db")
 	var err error
 	i.DB, err = bolt.Open(ghjsDBPath, 0600, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
@@ -26,7 +26,7 @@ func (i *impl) initDB() error {
 
 // frequence: weekly (1), fortnightly (2), monthly (3)
 // TODO: parse date from time.Now().String()
-func (i *impl) createUserBucket(email string) (bool, error) {
+func (i *impl) createUserBucket(email string) error {
 	err := i.DB.Update(func(tx *bolt.Tx) error {
 		b, err := tx.CreateBucket([]byte(email))
 		if err != nil {
@@ -68,19 +68,19 @@ func (i *impl) createUserBucket(email string) (bool, error) {
 		if err != nil {
 			return err
 		}
-		err = b.Put([]byte("userCreatedOn"), []byte(time.Now().Local().String()))
+		err = b.Put([]byte("userCreatedOn"), []byte(time.Now().Format("2006-01-02 15:04:05 -0700")))
 		if err != nil {
 			return err
 		}
 		return nil
 	})
 	if err != nil {
-		return false, err
+		return err
 	}
-	return true, nil
+	return nil
 }
 
-func (i *impl) checkBucketExists(email string) (bool, error) {
+func (i *impl) checkBucketExists(email string) error {
 	err := i.DB.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(email))
 		if b != nil {
@@ -89,7 +89,7 @@ func (i *impl) checkBucketExists(email string) (bool, error) {
 		return nil
 	})
 	if err != nil {
-		return false, err
+		return err
 	}
-	return true, nil
+	return nil
 }

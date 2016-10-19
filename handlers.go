@@ -11,34 +11,35 @@ func subscribeHandler(c *gin.Context) {
 	i := impl{}
 	err := i.initDB()
 	if err != nil {
-		log.Panicf("error initializing DB: %v\n", err)
+		log.Printf("error initializing DB: %v\n", err)
+		c.JSON(200, gin.H{
+			"success": false,
+			"message": "An internal error occured. Please try again later.",
+		})
 	}
 	defer i.DB.Close()
 
 	email := c.PostForm("email")
 	c.Header("Access-Control-Allow-Origin", "*")
 
-	if _, err := mail.ParseAddress(email); len(email) == 0 || len(email) > 254 || err != nil {
+	_, err = mail.ParseAddress(email)
+	if len(email) == 0 || len(email) > 254 || err != nil {
 		c.JSON(200, gin.H{
 			"success": false,
 			"message": "That email doesn't seem like a valid one.",
 		})
 	} else {
-		ok, err := i.checkBucketExists(email)
+		err := i.checkBucketExists(email)
 		if err != nil {
-			log.Panicf("error viewing bucket: %v\n", err)
-		}
-		if !ok {
+			log.Printf("error viewing bucket: %v\n", err)
 			c.JSON(200, gin.H{
 				"success": false,
 				"message": "A subscription with this email already exists.",
 			})
 		} else {
-			ok, err := i.createUserBucket(email)
+			err := i.createUserBucket(email)
 			if err != nil {
-				log.Panicf("error updating bucket: %v\n", err)
-			}
-			if !ok {
+				log.Printf("error updating bucket: %v\n", err)
 				c.JSON(200, gin.H{
 					"success": false,
 					"message": "An internal error occured. Please try again later.",
@@ -64,16 +65,13 @@ func unsubscribeHandler(c *gin.Context) {
 	email := c.PostForm("email")
 	c.Header("Access-Control-Allow-Origin", "*")
 
-	ok, err := i.checkBucketExists(email)
+	err = i.checkBucketExists(email)
 	if err != nil {
-		log.Panicf("error viewing bucket: %v\n", err)
-	}
-	if !ok {
+		log.Printf("error viewing bucket: %v\n", err)
 		c.JSON(200, gin.H{
 			"success": true,
 			"message": "Sad that you are leaving. Check your email for unsubscription confirmation.",
 		})
-
 	} else {
 		c.JSON(200, gin.H{
 			"success": false,
