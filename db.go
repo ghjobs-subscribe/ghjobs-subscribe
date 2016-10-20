@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path"
 	"time"
@@ -19,19 +20,20 @@ func (i *impl) initDB() error {
 	var err error
 	i.DB, err = bolt.Open(ghjsDBPath, 0600, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
-		return err
+		return fmt.Errorf("initDB: %v", err)
 	}
 	return nil
 }
 
 // frequence: weekly (1), fortnightly (2), monthly (3)
 // TODO: parse date from time.Now().String()
-func (i *impl) createUserBucket(email string) error {
+func (i *impl) createUserProfile(email string) error {
 	err := i.DB.Update(func(tx *bolt.Tx) error {
 		b, err := tx.CreateBucket([]byte(email))
 		if err != nil {
-			return fmt.Errorf("create bucket: %v", err)
+			return fmt.Errorf("createUserProfile: %v", err)
 		}
+
 		err = b.Put([]byte("userEmail"), []byte(email))
 		if err != nil {
 			return err
@@ -75,21 +77,33 @@ func (i *impl) createUserBucket(email string) error {
 		return nil
 	})
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 	return nil
 }
 
-func (i *impl) checkBucketExists(email string) error {
-	err := i.DB.View(func(tx *bolt.Tx) error {
+func (i *impl) checkUserExists(email string) bool {
+	userExists := false
+	i.DB.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(email))
 		if b != nil {
-			return fmt.Errorf("email exists")
+			userExists = true
 		}
 		return nil
 	})
-	if err != nil {
-		return err
-	}
-	return nil
+	return userExists
+}
+
+func (i *impl) checkUserSubscription(email string) bool {
+	userActive := false
+	i.DB.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(email))
+		ua := b.Get([]byte("userActive"))
+		if string(ua) == "true" {
+			userActive = true
+		}
+		return nil
+	})
+	return userActive
 }
