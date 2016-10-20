@@ -29,15 +29,14 @@ func subscribeHandler(c *gin.Context) {
 			"message": "That email doesn't seem like a valid one.",
 		})
 	} else {
-		err := i.checkBucketExists(email)
-		if err != nil {
-			log.Printf("error viewing bucket: %v\n", err)
+		ok := i.checkUserExists(email)
+		if ok != false {
 			c.JSON(200, gin.H{
 				"success": false,
 				"message": "A subscription with this email already exists.",
 			})
 		} else {
-			err := i.createUserBucket(email)
+			err := i.createUserProfile(email)
 			if err != nil {
 				log.Printf("error updating bucket: %v\n", err)
 				c.JSON(200, gin.H{
@@ -47,7 +46,7 @@ func subscribeHandler(c *gin.Context) {
 			} else {
 				c.JSON(200, gin.H{
 					"success": true,
-					"message": "All set! Check your email for subscription confirmation.",
+					"message": "All set! Check your email for a confirmation.",
 				})
 			}
 		}
@@ -65,13 +64,20 @@ func unsubscribeHandler(c *gin.Context) {
 	email := c.PostForm("email")
 	c.Header("Access-Control-Allow-Origin", "*")
 
-	err = i.checkBucketExists(email)
-	if err != nil {
-		log.Printf("error viewing bucket: %v\n", err)
-		c.JSON(200, gin.H{
-			"success": true,
-			"message": "Sad that you are leaving. Check your email for unsubscription confirmation.",
-		})
+	ok := i.checkUserExists(email)
+	if ok != false {
+		ok = i.checkUserSubscription(email)
+		if ok != false {
+			c.JSON(200, gin.H{
+				"success": true,
+				"message": "Sad that you are leaving. Check your email for a confirmation.<br>If you have a minute, please send a message about what made you unsubscribe. Your feedback will be appreciated.",
+			})
+		} else {
+			c.JSON(200, gin.H{
+				"success": false,
+				"message": "Looks like you have not activated account yet.",
+			})
+		}
 	} else {
 		c.JSON(200, gin.H{
 			"success": false,
