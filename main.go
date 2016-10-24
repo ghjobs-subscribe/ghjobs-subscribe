@@ -11,7 +11,7 @@ import (
 func main() {
 	r := gin.Default()
 
-	templatePath := path.Join("$GOPATH/src/github.com/ghjobs-subscribe/ghjobs-subscribe")
+	templatePath := path.Join("$GOPATH/src/github.com/ghjobs-subscribe/ghjobs-subscribe/templates")
 	files, _ := filepath.Glob(fmt.Sprintf("%s/*.tmpl", templatePath))
 	r.LoadHTMLFiles(files...)
 
