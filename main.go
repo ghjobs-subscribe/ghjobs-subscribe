@@ -1,19 +1,11 @@
 package main
 
-import (
-	"fmt"
-	"path"
-	"path/filepath"
-
-	"github.com/gin-gonic/gin"
-)
+import "github.com/gin-gonic/gin"
 
 func main() {
 	r := gin.Default()
 
-	templatePath := path.Join("$GOPATH/src/github.com/ghjobs-subscribe/ghjobs-subscribe/templates")
-	files, _ := filepath.Glob(fmt.Sprintf("%s/*.tmpl", templatePath))
-	r.LoadHTMLFiles(files...)
+	r.LoadHTMLGlob("templates/*")
 
 	r.POST("/subscribe", subscribeHandler)
 	r.GET("/subscribe/verify", subscribeVerifyHandler)
