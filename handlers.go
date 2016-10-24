@@ -1,9 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/mail"
+	"os"
+	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
 
@@ -44,11 +48,90 @@ func subscribeHandler(c *gin.Context) {
 					"message": "An internal error occured. Please try again later.",
 				})
 			} else {
-				c.JSON(200, gin.H{
-					"success": true,
-					"message": "All set! Check your email for a confirmation.",
+				err := sendActivationMail(email)
+				if err != nil {
+					log.Printf("error sending email: %v\n", err)
+					c.JSON(200, gin.H{
+						"success": false,
+						"message": "An internal error occured. Please try again later.",
+					})
+				} else {
+					c.JSON(200, gin.H{
+						"success": true,
+						"message": "All set! Check your email for a confirmation.",
+					})
+				}
+			}
+		}
+	}
+}
+
+func subscribeVerifyHandler(c *gin.Context) {
+	i := impl{}
+	err := i.initDB()
+	if err != nil {
+		log.Printf("error initializing DB: %v\n", err)
+		c.HTML(200, "verify.tmpl", gin.H{
+			"success": false,
+			"message": "An internal error occured. Please try again later.",
+		})
+	}
+	defer i.DB.Close()
+
+	token, err := jwt.ParseWithClaims(c.Query("token"), &ghjsCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(os.Getenv("GHJS_SECRET_STRING")), nil
+	})
+	if err != nil {
+		c.HTML(200, "verify.tmpl", gin.H{
+			"success":        false,
+			"showmanagelink": false,
+			"message":        "Invalid signing algorithm.",
+		})
+	} else {
+		if claims, ok := token.Claims.(*ghjsCustomClaims); ok && token.Valid {
+			if (claims.StandardClaims.Issuer == "ghjobssubscribe") && (claims.StandardClaims.ExpiresAt > time.Now().Unix()) {
+				if !i.checkUserSubscription(claims.Email) {
+					err := i.changeUserSubscription(claims.Email, "true")
+					if err != nil {
+						c.HTML(200, "verify.tmpl", gin.H{
+							"success":        false,
+							"email":          claims.Email,
+							"showmanagelink": false,
+							"message":        "An internal error occured. Click on the validation link (sent to your email) again.",
+						})
+					} else {
+						c.HTML(200, "verify.tmpl", gin.H{
+							"success":        true,
+							"email":          claims.Email,
+							"showmanagelink": true,
+							"message":        "Your subscription is now active.",
+						})
+					}
+				} else {
+					c.HTML(200, "verify.tmpl", gin.H{
+						"success":        false,
+						"email":          claims.Email,
+						"showmanagelink": true,
+						"message":        "Your subscription is already active.",
+					})
+				}
+			} else {
+				c.HTML(200, "verify.tmpl", gin.H{
+					"success":        false,
+					"email":          claims.Email,
+					"showmanagelink": true,
+					"message":        "Invalid token.",
 				})
 			}
+		} else {
+			c.HTML(200, "verify.tmpl", gin.H{
+				"success":        false,
+				"showmanagelink": true,
+				"message":        "Invalid token.",
+			})
 		}
 	}
 }
@@ -70,12 +153,12 @@ func unsubscribeHandler(c *gin.Context) {
 		if ok != false {
 			c.JSON(200, gin.H{
 				"success": true,
-				"message": "Sad that you are leaving. Check your email for a confirmation.<br>If you have a minute, please send a message about what made you unsubscribe. Your feedback will be appreciated.",
+				"message": "Sad that you are leaving. Check your email for a confirmation.",
 			})
 		} else {
 			c.JSON(200, gin.H{
 				"success": false,
-				"message": "Looks like you have not activated account yet.",
+				"message": "Your account isn't active yet.",
 			})
 		}
 	} else {
