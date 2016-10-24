@@ -14,7 +14,7 @@ type ghjsCustomClaims struct {
 }
 
 func sendActivationMail(to string) error {
-	from := "no-reply@ghjobssubscribe.com"
+	from := "mail@ghjobssubscribe.com"
 	password := os.Getenv("GHJS_NOREPLY_PASSWORD")
 
 	body, err := generateActivationBody(to)
