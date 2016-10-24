@@ -25,7 +25,6 @@ func (i *impl) initDB() error {
 	return nil
 }
 
-// frequence: weekly (1), fortnightly (2), monthly (3)
 // TODO: parse date from time.Now().String()
 func (i *impl) createUserProfile(email string) error {
 	err := i.DB.Update(func(tx *bolt.Tx) error {
@@ -58,15 +57,7 @@ func (i *impl) createUserProfile(email string) error {
 		if err != nil {
 			return err
 		}
-		err = b.Put([]byte("subFrequence"), []byte(""))
-		if err != nil {
-			return err
-		}
 		err = b.Put([]byte("emailLastSent"), []byte(""))
-		if err != nil {
-			return err
-		}
-		err = b.Put([]byte("emailNextSend"), []byte(""))
 		if err != nil {
 			return err
 		}
@@ -106,4 +97,20 @@ func (i *impl) checkUserSubscription(email string) bool {
 		return nil
 	})
 	return userActive
+}
+
+func (i *impl) changeUserSubscription(email, userActiveValue string) error {
+	err := i.DB.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(email))
+		err := b.Put([]byte("userActive"), []byte(userActiveValue))
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
 }
