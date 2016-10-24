@@ -26,7 +26,7 @@ func sendActivationMail(to string) error {
 		"To: " + to + "\r\n" +
 		"MIME-Version: 1.0" + "\r\n" +
 		"Content-type: text/html" + "\r\n" +
-		"Subject: Verify you subscription email for GHJobs Subscribe" + "\r\n\r\n" +
+		"Subject: GHJobs Subscribe: Please Confrim Subscription" + "\r\n\r\n" +
 		body + "\r\n"
 
 	err = smtp.SendMail("smtp.gmail.com:587", smtp.PlainAuth("", from, password, "smtp.gmail.com"), from, []string{to}, []byte(msg))
