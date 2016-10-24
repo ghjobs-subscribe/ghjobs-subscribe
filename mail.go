@@ -13,7 +13,7 @@ type ghjsCustomClaims struct {
 	jwt.StandardClaims
 }
 
-func sendActivationMail(to string) error {
+func sendVerificationMail(to string) error {
 	from := "mail@ghjobssubscribe.com"
 	password := os.Getenv("GHJS_NOREPLY_PASSWORD")
 

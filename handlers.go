@@ -48,7 +48,7 @@ func subscribeHandler(c *gin.Context) {
 					"message": "An internal error occured. Please try again later.",
 				})
 			} else {
-				err := sendActivationMail(email)
+				err := sendVerificationMail(email)
 				if err != nil {
 					log.Printf("error sending email: %v\n", err)
 					c.JSON(200, gin.H{
