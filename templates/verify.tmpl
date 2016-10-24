@@ -1,0 +1,18 @@
+<html>
+    <head>
+    <title>GHJobs Subscription - Email Verification</title>
+    </head>
+    <body>
+        {{ if .email }}
+        {{ .email }} -
+        {{ end }}
+        <strong>{{ .message }}</strong>
+        <br>
+        <br>
+        {{ if .showmanagelink }}
+        Visit the following link to manage your subscription or to resend the verification link:
+        <br>
+        <a href="https://ghjobssubscribe.com/manage">Manage Subscription</a>
+        {{ end }}
+    </body>
+</html>
