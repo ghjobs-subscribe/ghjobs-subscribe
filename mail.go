@@ -56,5 +56,5 @@ func generateActivationBody(email string) (string, error) {
 }
 
 func getActivationURL(tokenString string) string {
-	return "http://localhost:8080/subscribe/verify?token=" + tokenString
+	return "https://api.ghjobssubscribe.com/subscribe/verify?token=" + tokenString
 }
