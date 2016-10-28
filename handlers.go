@@ -247,3 +247,35 @@ func unsubscribeVerifyHandler(c *gin.Context) {
 		}
 	}
 }
+
+func manageHandler(c *gin.Context) {
+	i := impl{}
+	err := i.initDB()
+	if err != nil {
+		log.Panicf("error initializing DB: %v\n", err)
+	}
+	defer i.DB.Close()
+
+	email := c.PostForm("email")
+	c.Header("Access-Control-Allow-Origin", "*")
+
+	ok := i.checkUserExists(email)
+	if ok != false {
+		userEmail, userFirstName, userLastName, userActive, subTag, subLocation, userCreatedOn := i.fetchUserProfile(email)
+		c.JSON(200, gin.H{
+			"success":       true,
+			"userEmail":     userEmail,
+			"userFirstName": userFirstName,
+			"userLastName":  userLastName,
+			"userActive":    userActive,
+			"subTag":        subTag,
+			"subLocation":   subLocation,
+			"userCreatedOn": userCreatedOn,
+		})
+	} else {
+		c.JSON(200, gin.H{
+			"success": false,
+			"message": "A subscription with this email does not exist.",
+		})
+	}
+}

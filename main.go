@@ -9,7 +9,7 @@ func main() {
 
 	r.POST("/subscribe", subscribeHandler)
 	r.GET("/subscribe/verify", subscribeVerifyHandler)
-	// r.POST("/manage", manageHander)
+	r.POST("/manage", manageHandler)
 	r.POST("/unsubscribe", unsubscribeHandler)
 	r.GET("/unsubscribe/verify", unsubscribeVerifyHandler)
 	r.Run(":8080")
