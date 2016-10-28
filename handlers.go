@@ -167,7 +167,7 @@ func unsubscribeHandler(c *gin.Context) {
 		} else {
 			c.JSON(200, gin.H{
 				"success": false,
-				"message": "Your subscription is inactive.",
+				"message": "Your subscription is already inactive.",
 			})
 		}
 	} else {
