@@ -25,7 +25,6 @@ func (i *impl) initDB() error {
 	return nil
 }
 
-// TODO: parse date from time.Now().String()
 func (i *impl) createUserProfile(email string) error {
 	err := i.DB.Update(func(tx *bolt.Tx) error {
 		b, err := tx.CreateBucket([]byte(email))
@@ -72,6 +71,21 @@ func (i *impl) createUserProfile(email string) error {
 		return err
 	}
 	return nil
+}
+
+func (i *impl) fetchUserProfile(email string) (userEmail, userFirstName, userLastName, userActive, subTag, subLocation, userCreatedOn string) {
+	i.DB.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(email))
+		userEmail = string(b.Get([]byte("userEmail")))
+		userFirstName = string(b.Get([]byte("userFirstName")))
+		userLastName = string(b.Get([]byte("userLastName")))
+		userActive = string(b.Get([]byte("userActive")))
+		subTag = string(b.Get([]byte("subTag")))
+		subLocation = string(b.Get([]byte("subLocation")))
+		userCreatedOn = string(b.Get([]byte("userCreatedOn")))
+		return nil
+	})
+	return
 }
 
 func (i *impl) checkUserExists(email string) bool {
