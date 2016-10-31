@@ -261,7 +261,7 @@ func manageHandler(c *gin.Context) {
 
 	ok := i.checkUserExists(email)
 	if ok != false {
-		userEmail, userFirstName, userLastName, userActive, subTag, subLocation, userCreatedOn := i.fetchUserProfile(email)
+		userEmail, userFirstName, userLastName, userActive, subTag, subLocation, _ := i.getUserProfile(email)
 		if userActive == "true" {
 			c.JSON(200, gin.H{
 				"success":       true,
@@ -271,7 +271,6 @@ func manageHandler(c *gin.Context) {
 				"userActive":    userActive,
 				"subTag":        subTag,
 				"subLocation":   subLocation,
-				"userCreatedOn": userCreatedOn,
 				"message":       "Update your preferences.",
 			})
 		} else {
@@ -283,9 +282,61 @@ func manageHandler(c *gin.Context) {
 				"userActive":    userActive,
 				"subTag":        subTag,
 				"subLocation":   subLocation,
-				"userCreatedOn": userCreatedOn,
 				"message":       "Reactivate your account",
 			})
+		}
+	} else {
+		c.JSON(200, gin.H{
+			"success": false,
+			"message": "A subscription with this email does not exist.",
+		})
+	}
+}
+
+func manageUpdateHandler(c *gin.Context) {
+	i := impl{}
+	err := i.initDB()
+	if err != nil {
+		log.Panicf("error initializing DB: %v\n", err)
+	}
+	defer i.DB.Close()
+
+	email := c.PostForm("userEmail")
+	userFirstName := c.PostForm("userFirstName")
+	userLastName := c.PostForm("userLastName")
+	subTag := c.PostForm("subTag")
+	subLocation := c.PostForm("subLocation")
+	c.Header("Access-Control-Allow-Origin", "*")
+
+	ok := i.checkUserExists(email)
+	if ok != false {
+		err := i.setUserProfile(email, userFirstName, userLastName, subTag, subLocation)
+		if err != nil {
+			c.JSON(200, gin.H{
+				"success": false,
+				"message": "An internal error occured. Please try again later.",
+			})
+		} else {
+			ok := i.checkUserSubscription(email)
+			if ok != true {
+				err := sendVerificationMail(email, true)
+				if err != nil {
+					c.JSON(200, gin.H{
+						"success": false,
+						"message": "An internal error occured. Please try again later.",
+					})
+				} else {
+					c.JSON(200, gin.H{
+						"success": true,
+						"message": "Your subscription has been updated. Check your email for a confirmation",
+					})
+				}
+			} else {
+				c.JSON(200, gin.H{
+					"success": true,
+					"message": "Your subscription has been updated.",
+				})
+			}
 		}
 	} else {
 		c.JSON(200, gin.H{
