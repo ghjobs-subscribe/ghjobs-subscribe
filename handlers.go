@@ -262,16 +262,31 @@ func manageHandler(c *gin.Context) {
 	ok := i.checkUserExists(email)
 	if ok != false {
 		userEmail, userFirstName, userLastName, userActive, subTag, subLocation, userCreatedOn := i.fetchUserProfile(email)
-		c.JSON(200, gin.H{
-			"success":       true,
-			"userEmail":     userEmail,
-			"userFirstName": userFirstName,
-			"userLastName":  userLastName,
-			"userActive":    userActive,
-			"subTag":        subTag,
-			"subLocation":   subLocation,
-			"userCreatedOn": userCreatedOn,
-		})
+		if userActive == "true" {
+			c.JSON(200, gin.H{
+				"success":       true,
+				"userEmail":     userEmail,
+				"userFirstName": userFirstName,
+				"userLastName":  userLastName,
+				"userActive":    userActive,
+				"subTag":        subTag,
+				"subLocation":   subLocation,
+				"userCreatedOn": userCreatedOn,
+				"message":       "Update your preferences.",
+			})
+		} else {
+			c.JSON(200, gin.H{
+				"success":       true,
+				"userEmail":     userEmail,
+				"userFirstName": userFirstName,
+				"userLastName":  userLastName,
+				"userActive":    userActive,
+				"subTag":        subTag,
+				"subLocation":   subLocation,
+				"userCreatedOn": userCreatedOn,
+				"message":       "Reactivate your account",
+			})
+		}
 	} else {
 		c.JSON(200, gin.H{
 			"success": false,
