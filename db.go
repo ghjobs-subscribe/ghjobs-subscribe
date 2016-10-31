@@ -73,7 +73,7 @@ func (i *impl) createUserProfile(email string) error {
 	return nil
 }
 
-func (i *impl) fetchUserProfile(email string) (userEmail, userFirstName, userLastName, userActive, subTag, subLocation, userCreatedOn string) {
+func (i *impl) getUserProfile(email string) (userEmail, userFirstName, userLastName, userActive, subTag, subLocation, userCreatedOn string) {
 	i.DB.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(email))
 		userEmail = string(b.Get([]byte("userEmail")))
@@ -86,6 +86,35 @@ func (i *impl) fetchUserProfile(email string) (userEmail, userFirstName, userLas
 		return nil
 	})
 	return
+}
+
+func (i *impl) setUserProfile(email, userFirstName, userLastName, subTag, subLocation string) error {
+	err := i.DB.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(email))
+
+		err := b.Put([]byte("userFirstName"), []byte(userFirstName))
+		if err != nil {
+			return err
+		}
+		err = b.Put([]byte("userLastName"), []byte(userLastName))
+		if err != nil {
+			return err
+		}
+		err = b.Put([]byte("subTag"), []byte(subTag))
+		if err != nil {
+			return err
+		}
+		err = b.Put([]byte("subLocation"), []byte(subLocation))
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
 }
 
 func (i *impl) checkUserExists(email string) bool {
