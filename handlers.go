@@ -18,7 +18,7 @@ func subscribeHandler(c *gin.Context) {
 		log.Printf("error initializing DB: %v\n", err)
 		c.JSON(200, gin.H{
 			"success": false,
-			"message": "An internal error occured. Please try again later.",
+			"message": "An internal error occurred. Please try again later.",
 		})
 	}
 	defer i.DB.Close()
@@ -45,7 +45,7 @@ func subscribeHandler(c *gin.Context) {
 				log.Printf("error updating bucket: %v\n", err)
 				c.JSON(200, gin.H{
 					"success": false,
-					"message": "An internal error occured. Please try again later.",
+					"message": "An internal error occurred. Please try again later.",
 				})
 			} else {
 				err := sendVerificationMail(email, true)
@@ -53,7 +53,7 @@ func subscribeHandler(c *gin.Context) {
 					log.Printf("error sending email: %v\n", err)
 					c.JSON(200, gin.H{
 						"success": false,
-						"message": "An internal error occured. Please try again later.",
+						"message": "An internal error occurred. Please try again later.",
 					})
 				} else {
 					c.JSON(200, gin.H{
@@ -73,7 +73,7 @@ func subscribeVerifyHandler(c *gin.Context) {
 		log.Printf("error initializing DB: %v\n", err)
 		c.HTML(200, "verify.tmpl", gin.H{
 			"success": false,
-			"message": "An internal error occured. Please try again later.",
+			"message": "An internal error occurred. Please try again later.",
 		})
 	}
 	defer i.DB.Close()
@@ -100,7 +100,7 @@ func subscribeVerifyHandler(c *gin.Context) {
 							"success":        false,
 							"email":          claims.Email,
 							"showmanagelink": false,
-							"message":        "An internal error occured. Click on the link (sent to your email) again.",
+							"message":        "An internal error occurred. Click on the link (sent to your email) again.",
 						})
 					} else {
 						c.HTML(200, "verify.tmpl", gin.H{
@@ -156,7 +156,7 @@ func unsubscribeHandler(c *gin.Context) {
 				log.Printf("error sending email: %v\n", err)
 				c.JSON(200, gin.H{
 					"success": false,
-					"message": "An internal error occured. Please try again later.",
+					"message": "An internal error occurred. Please try again later.",
 				})
 			} else {
 				c.JSON(200, gin.H{
@@ -185,7 +185,7 @@ func unsubscribeVerifyHandler(c *gin.Context) {
 		log.Printf("error initializing DB: %v\n", err)
 		c.HTML(200, "verify.tmpl", gin.H{
 			"success": false,
-			"message": "An internal error occured. Please try again later.",
+			"message": "An internal error occurred. Please try again later.",
 		})
 	}
 	defer i.DB.Close()
@@ -212,7 +212,7 @@ func unsubscribeVerifyHandler(c *gin.Context) {
 							"success":        false,
 							"email":          claims.Email,
 							"showmanagelink": false,
-							"message":        "An internal error occured. Click on the link (sent to your email) again.",
+							"message":        "An internal error occurred. Click on the link (sent to your email) again.",
 						})
 					} else {
 						c.HTML(200, "verify.tmpl", gin.H{
@@ -314,7 +314,7 @@ func manageUpdateHandler(c *gin.Context) {
 		if err != nil {
 			c.JSON(200, gin.H{
 				"success": false,
-				"message": "An internal error occured. Please try again later.",
+				"message": "An internal error occurred. Please try again later.",
 			})
 		} else {
 			ok := i.checkUserSubscription(email)
@@ -323,7 +323,7 @@ func manageUpdateHandler(c *gin.Context) {
 				if err != nil {
 					c.JSON(200, gin.H{
 						"success": false,
-						"message": "An internal error occured. Please try again later.",
+						"message": "An internal error occurred. Please try again later.",
 					})
 				} else {
 					c.JSON(200, gin.H{
