@@ -11,7 +11,7 @@ import (
 // GHJSCustomClaims holds claims for generating JWT tokens
 type GHJSCustomClaims struct {
 	Email     string `json:"email"`
-	Subscribe string `json:"subscribe`
+	Subscribe string `json:"subscribe"`
 	jwt.StandardClaims
 }
 
